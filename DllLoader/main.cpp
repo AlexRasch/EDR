@@ -1,8 +1,6 @@
 #include <Windows.h>
 #include <iostream>
 
-
-
 void CheckDebuggerStatus() {
 	if (IsDebuggerPresent())
 		std::cout << "Debugger is detected!" << std::endl;
@@ -76,10 +74,6 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	LoadLibraryA();
 	LoadLibraryW();
 
-
-
-
-
 	/* ntdll part */
 
 	// Shellcode for launching calc.exe 
@@ -115,9 +109,6 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	printf("Moved shellcode into allocated memory: %p\n", exec);
 	system("pause");
 	((void(*)())exec)();
-
-
-
 
 	FreeLibrary(hDLL); // Our EDR dll
 

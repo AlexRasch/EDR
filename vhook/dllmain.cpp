@@ -12,22 +12,29 @@
 
 /* ntdll */
 
-typedef DWORD(NTAPI* pNtAllocateVirtualMemory)(
-	HANDLE ProcessHandle,
-	PVOID* BaseAddress,
-	ULONG_PTR ZeroBits,
-	PSIZE_T RegionSize,
-	ULONG AllocationType,
-	ULONG Protect);
 
-typedef DWORD(WINAPI* pNtProtectVirtualMemory)(
-	HANDLE ProcessHandle,
-	PVOID* BaseAddress,
-	PSIZE_T RegionSize,
-	ULONG NewProtect,
-	PULONG OldProtect);
 
+
+
+// NtAllocateVirtualMemory
+typedef DWORD(NTAPI* pNtAllocateVirtualMemory)(HANDLE ProcessHandle, PVOID* BaseAddress, ULONG_PTR ZeroBits, PSIZE_T RegionSize, ULONG AllocationType, ULONG Protect);
 pNtAllocateVirtualMemory pOriginalNtAllocateVirtualMemory = nullptr;
+DWORD NTAPI HookedNtAllocateVirtualMemory(HANDLE ProcessHandle, PVOID* BaseAddress, ULONG_PTR ZeroBits, PSIZE_T RegionSize, ULONG AllocationType, ULONG Protect)
+{
+	if (Protect == PAGE_EXECUTE_READWRITE) {
+		std::cout << "[HOOK] PAGE_EXECUTE_READWRITE permission detected in NtAllocateVirtualMemory function call!" << std::endl;
+	}
+	return pOriginalNtAllocateVirtualMemory(ProcessHandle, BaseAddress, ZeroBits, RegionSize, AllocationType, Protect);
+}
+DWORD NTAPI HookedNtProtectVirtualMemory(HANDLE ProcessHandle, PVOID* BaseAddress, PSIZE_T RegionSize, ULONG NewProtect, PULONG OldProtect) {
+	if (NewProtect == PAGE_EXECUTE_READWRITE) {
+		std::cout << "[HOOK] PAGE_EXECUTE_READWRITE permission detected in NtProtectVirtualMemory function call!" << std::endl;
+	}
+	return pOriginalNtProtectVirutalMemory(ProcessHandle, BaseAddress, RegionSize, NewProtect, OldProtect);
+}
+
+// NtProtectVirtualMemory
+typedef DWORD(WINAPI* pNtProtectVirtualMemory)(HANDLE ProcessHandle, PVOID* BaseAddress, PSIZE_T RegionSize,ULONG NewProtect, PULONG OldProtect);
 pNtProtectVirtualMemory pOriginalNtProtectVirutalMemory = nullptr;
 
 // LdrLoadDll
@@ -70,24 +77,6 @@ FARPROC WINAPI HookedGetProcAddress(HMODULE hModule, LPCSTR lpProcName) {
 	return pOriginalGetProcAddress(hModule, lpProcName);
 }
 
-
-DWORD NTAPI HookedNtAllocateVirtualMemory(HANDLE ProcessHandle, PVOID* BaseAddress, ULONG_PTR ZeroBits, PSIZE_T RegionSize, ULONG AllocationType, ULONG Protect)
-{
-	if (Protect == PAGE_EXECUTE_READWRITE) {
-		std::cout << "[HOOK] PAGE_EXECUTE_READWRITE permission detected in NtAllocateVirtualMemory function call!" << std::endl;
-	}
-	return pOriginalNtAllocateVirtualMemory(ProcessHandle, BaseAddress, ZeroBits, RegionSize, AllocationType, Protect);
-}
-
-DWORD NTAPI HookedNtProtectVirtualMemory(HANDLE ProcessHandle, PVOID* BaseAddress, PSIZE_T RegionSize, ULONG NewProtect, PULONG OldProtect) {
-	if (NewProtect == PAGE_EXECUTE_READWRITE) {
-		std::cout << "[HOOK] PAGE_EXECUTE_READWRITE permission detected in NtProtectVirtualMemory function call!" << std::endl;
-	}
-	return pOriginalNtProtectVirutalMemory(ProcessHandle, BaseAddress, RegionSize, NewProtect, OldProtect);
-}
-
-
-
 void InitializeHooks() {
 	MH_STATUS status = MH_Initialize();
 	if (status != MH_OK) {
@@ -108,7 +97,6 @@ void InitializeHooks() {
 	//	std::cout << "Could not hook LdrLoadDll" << std::endl;
 	//	return;
 	//}
-
 
 	if (MH_CreateHookApi(L"KernelBase", "IsDebuggerPresent", &HookedIsDebuggerPresent, (LPVOID*)&pOriginalIsDebuggerPresent) != MH_OK) {
 		std::cout << "Failed to hook IsDebuggerPresent" << std::endl;
@@ -140,9 +128,6 @@ void InitializeHooks() {
 	}
 	std::cout << "Hooks installed successfully!" << std::endl;
 }
-
-
-
 
 void CreateConsole() {
 	FreeConsole();
