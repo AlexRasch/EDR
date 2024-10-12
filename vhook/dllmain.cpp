@@ -52,7 +52,6 @@ void WINAPI HookedSleep(DWORD dwMilliseconds) {
 	pOriginalSleep(dwMilliseconds);
 }
 
-
 // IsDebuggerPresent
 typedef BOOL(WINAPI* pIsDebuggerPresent)(void);
 pIsDebuggerPresent pOriginalIsDebuggerPresent = nullptr;

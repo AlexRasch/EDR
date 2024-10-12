@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DllLoader", "DllLoader\DllL
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vhook", "vhook\vhook.vcxproj", "{CAE55C61-C178-4C77-80C5-2B63D35E78C9}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vAgent", "vAgent\vAgent.vcxproj", "{AE3E2F37-88ED-4338-8751-E33D7C76873B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{CAE55C61-C178-4C77-80C5-2B63D35E78C9}.Release|x64.Build.0 = Release|x64
 		{CAE55C61-C178-4C77-80C5-2B63D35E78C9}.Release|x86.ActiveCfg = Release|Win32
 		{CAE55C61-C178-4C77-80C5-2B63D35E78C9}.Release|x86.Build.0 = Release|Win32
+		{AE3E2F37-88ED-4338-8751-E33D7C76873B}.Debug|x64.ActiveCfg = Debug|x64
+		{AE3E2F37-88ED-4338-8751-E33D7C76873B}.Debug|x64.Build.0 = Debug|x64
+		{AE3E2F37-88ED-4338-8751-E33D7C76873B}.Debug|x86.ActiveCfg = Debug|Win32
+		{AE3E2F37-88ED-4338-8751-E33D7C76873B}.Debug|x86.Build.0 = Debug|Win32
+		{AE3E2F37-88ED-4338-8751-E33D7C76873B}.Release|x64.ActiveCfg = Release|x64
+		{AE3E2F37-88ED-4338-8751-E33D7C76873B}.Release|x64.Build.0 = Release|x64
+		{AE3E2F37-88ED-4338-8751-E33D7C76873B}.Release|x86.ActiveCfg = Release|Win32
+		{AE3E2F37-88ED-4338-8751-E33D7C76873B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
