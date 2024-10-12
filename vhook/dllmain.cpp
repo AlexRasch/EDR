@@ -13,9 +13,6 @@
 /* ntdll */
 
 
-
-
-
 // NtAllocateVirtualMemory
 typedef DWORD(NTAPI* pNtAllocateVirtualMemory)(HANDLE ProcessHandle, PVOID* BaseAddress, ULONG_PTR ZeroBits, PSIZE_T RegionSize, ULONG AllocationType, ULONG Protect);
 pNtAllocateVirtualMemory pOriginalNtAllocateVirtualMemory = nullptr;
@@ -26,16 +23,16 @@ DWORD NTAPI HookedNtAllocateVirtualMemory(HANDLE ProcessHandle, PVOID* BaseAddre
 	}
 	return pOriginalNtAllocateVirtualMemory(ProcessHandle, BaseAddress, ZeroBits, RegionSize, AllocationType, Protect);
 }
+
+// NtProtectVirtualMemory
+typedef DWORD(WINAPI* pNtProtectVirtualMemory)(HANDLE ProcessHandle, PVOID* BaseAddress, PSIZE_T RegionSize,ULONG NewProtect, PULONG OldProtect);
+pNtProtectVirtualMemory pOriginalNtProtectVirutalMemory = nullptr;
 DWORD NTAPI HookedNtProtectVirtualMemory(HANDLE ProcessHandle, PVOID* BaseAddress, PSIZE_T RegionSize, ULONG NewProtect, PULONG OldProtect) {
 	if (NewProtect == PAGE_EXECUTE_READWRITE) {
 		std::cout << "[HOOK] PAGE_EXECUTE_READWRITE permission detected in NtProtectVirtualMemory function call!" << std::endl;
 	}
 	return pOriginalNtProtectVirutalMemory(ProcessHandle, BaseAddress, RegionSize, NewProtect, OldProtect);
 }
-
-// NtProtectVirtualMemory
-typedef DWORD(WINAPI* pNtProtectVirtualMemory)(HANDLE ProcessHandle, PVOID* BaseAddress, PSIZE_T RegionSize,ULONG NewProtect, PULONG OldProtect);
-pNtProtectVirtualMemory pOriginalNtProtectVirutalMemory = nullptr;
 
 // LdrLoadDll
 typedef NTSTATUS(NTAPI* pLdrLoadDll)(PWCHAR PathToFile, ULONG Flags, PUNICODE_STRING ModuleFileName, PHANDLE ModuleHandle);
@@ -44,6 +41,17 @@ NTSTATUS NTAPI HookedLdrLoadDll(PWCHAR PathToFile, ULONG Flags, PUNICODE_STRING 
 	std::wcout << L"LdrLoadDll called. Loading DLL: " << ModuleFileName->Buffer << std::endl;
 	return pOriginalLdrLoadDll(PathToFile, Flags, ModuleFileName, ModuleHandle);
 }
+
+// Sleep
+typedef void(WINAPI* pSleep)(DWORD dwMilliseconds);
+pSleep pOriginalSleep = nullptr;
+void WINAPI HookedSleep(DWORD dwMilliseconds) {
+	std::cout << "[HOOK] Sleep called with " << dwMilliseconds << " milliseconds!" << std::endl;
+
+	// Call the original function to preserve functionality
+	pOriginalSleep(dwMilliseconds);
+}
+
 
 // IsDebuggerPresent
 typedef BOOL(WINAPI* pIsDebuggerPresent)(void);
@@ -97,6 +105,11 @@ void InitializeHooks() {
 	//	std::cout << "Could not hook LdrLoadDll" << std::endl;
 	//	return;
 	//}
+
+	if (MH_CreateHookApi(L"kernel32", "Sleep", &HookedSleep, (LPVOID*)&pOriginalSleep) != MH_OK) {
+		std::cout << "Failed to hook Sleep" << std::endl;
+		return;
+	}
 
 	if (MH_CreateHookApi(L"KernelBase", "IsDebuggerPresent", &HookedIsDebuggerPresent, (LPVOID*)&pOriginalIsDebuggerPresent) != MH_OK) {
 		std::cout << "Failed to hook IsDebuggerPresent" << std::endl;
