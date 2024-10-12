@@ -141,22 +141,8 @@ void InitializeHooks() {
 	std::cout << "Hooks installed successfully!" << std::endl;
 }
 
-void CreateConsole() {
-	FreeConsole();
 
-	if (AllocConsole()) {
-		FILE* file;
-		freopen_s(&file, "CONOUT$", "w", stdout);
-		freopen_s(&file, "CONOUT$", "w", stderr);
-		freopen_s(&file, "CONIN$", "w", stdin);
-
-		SetConsoleTitle(L"Hook DLL");
-		std::cout << "Console allocated..." << std::endl;
-	}
-}
 DWORD MainFunction(LPVOID lpParam) {
-	// Create a console
-	CreateConsole();
 	InitializeHooks();
 	Sleep(500000);
 	// Initialize hooks
@@ -176,8 +162,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	case DLL_THREAD_ATTACH:
 	case DLL_THREAD_DETACH:
 	case DLL_PROCESS_DETACH:
-		FreeConsole();
-		break;
+
 	}
 	return TRUE;
 }
